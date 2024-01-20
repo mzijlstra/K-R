@@ -1,0 +1,3 @@
+My first instinct would be to feed it its own source code as a test.
+
+In general you should test edge cases (empty string, null, etc.) and typical cases (one line, multiple lines, etc.) to see if it behaves as expected.

@@ -1,0 +1,15 @@
+As far as I know the escape characters are:
+\n newline
+\r carriage return
+\t tab
+\v vertical tab
+\f form feed
+\a alert (bell)
+\b backspace
+\0 null character
+\\ backslash
+\’ single quote (inside single quote)
+\” double quote (inside double quote)
+\? question mark (for pre-processor trigraphs)
+
+see: http://en.wikipedia.org/wiki/Escape_sequences_in_C
