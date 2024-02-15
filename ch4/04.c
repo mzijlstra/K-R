@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <stdio.h>
-#include <stdlib.h>/* for atof() */
+#include <stdlib.h> /* for atof() */
+#include <string.h> /* for strncmp() */
 
 #define MAXOP 100  /* max size of operand or operator */
 #define NUMBER '0' /* signal that a number was found */
@@ -8,7 +9,7 @@
 int getop(char[]);
 void push(double);
 double pop(void);
-void clear(void);
+void doCommand(char s[]);
 
 /* reverse Polish calculator */
 int main() {
@@ -45,37 +46,19 @@ int main() {
                 printf("error: zero divisor\n");
             }
             break;
-        case 'c': /* clear stack */
-            clear();
+        case '!':
+            doCommand(s);
             break;
-        case 'd': /* duplicate top element */
-            op2 = pop();
-            push(op2);
-            push(op2);
-            break;
-        case 'p': /* pop top element */
-            printf("\t%.8g\n", pop());
-            break;
-        case 'q': /* quit program */
-            goto end;
-        case 'r': /* print top element */
         case '\n':
-            op2 = pop();
-            push(op2);
-            printf("\t%.8g\n", op2);
-            break;
-        case 's': /* swap top 2 elements */
-            op2 = pop();
             op1 = pop();
-            push(op2);
             push(op1);
+            printf("\t%.8g\n", op1);
             break;
         default:
-            printf("error: unknown command %s\n", s);
+            printf("error: unknown command %s type:%c \n", s, type);
             break;
         }
     }
-end:
     return 0;
 }
 
@@ -99,29 +82,55 @@ double pop(void) {
         return 0.0;
     }
 }
-/* clear: reset the stack pointer to quickly clear stack */
-void clear(void) {
-    sp = 0;
-    printf("stack cleared\n");
+
+void doCommand(char s[]) {
+    double val, val2;
+    if (strncmp(s, "print", MAXOP) == 0) {
+        val = pop();
+        push(val);
+        printf("\t%.8g\n", val);
+    } else if (strncmp(s, "dup", MAXOP) == 0) {
+        val = pop();
+        push(val);
+        push(val);
+        printf("Duplicated %.8g \n", val);
+    } else if (strncmp(s, "swap", MAXOP) == 0) {
+        val = pop();
+        val2 = pop();
+        push(val);
+        push(val2);
+        printf("Swapped %.8g and %.8g\n", val, val2);
+    } else if (strncmp(s, "clear", MAXOP) == 0) {
+        sp = 0;
+        printf("Stack cleared\n");
+    } else if (strncmp(s, "pop", MAXOP) == 0) {
+        val = pop();
+        printf("Popped %.8g off the stack\n", val);
+    } else {
+        printf("Unknown command, options are: print, dup, swap, clear, pop\n");
+    }
 }
 
 int getch(void);
 void ungetch(int);
 
 /* getop: get next operator or numeric operand */
+/* s is an out parameter that can contain the number string or other operand */
 int getop(char s[]) {
     int i, c, n;
     while ((s[0] = c = getch()) == ' ' || c == '\t')
         ;
-    s[1] = '\0';
 
-    /* remove newline for letter commands */
-    if (c >= 'a' && c <= 'z') {
-        n = getch();
-        if (n == '\n') {
-            return c;
-        }
+    i = 0;
+    if (c == '!') {
+        // fill s with the command
+        while ((s[i++] = c = getch()) >= 'a' && c <= 'z')
+            ;
+        s[i - 1] = '\0';
+        return '!';
     }
+
+    s[1] = '\0';
 
     if (c == '-') {
         n = getch();
